@@ -1,0 +1,72 @@
+:root {
+  color-scheme: light;
+}
+
+html, body {
+  margin: 0;
+  background: oklch(0.9 0.01 60);
+  font-family: 'Rubik', system-ui, sans-serif;
+  height: 100%;
+}
+
+#root {
+  min-height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input, textarea, select, button {
+  font-family: 'Rubik', system-ui, sans-serif;
+}
+
+::placeholder {
+  color: oklch(0.65 0.01 50);
+}
+
+a {
+  color: oklch(0.62 0.13 35);
+}
+a:hover {
+  color: oklch(0.52 0.13 35);
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.4); opacity: 0; }
+  70% { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes stepIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.press {
+  transition: transform 0.15s ease;
+}
+.press:active {
+  transform: scale(0.96);
+}
+.press-sm:active {
+  transform: scale(0.85);
+}
+.press-icon:active {
+  transform: scale(0.8);
+}

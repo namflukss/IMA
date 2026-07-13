@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:oklch(0.9 0.01 60);font-family:'Rubik',system-ui,sans-serif;}
+  * { box-sizing:border-box; }
+  input,textarea,select,button{font-family:'Rubik',system-ui,sans-serif;}
+  ::placeholder{color:oklch(0.65 0.01 50);}
+  a{color:oklch(0.62 0.13 35);}
+  a:hover{color:oklch(0.52 0.13 35);}
+  ::-webkit-scrollbar{display:none;}
+  @keyframes popIn{0%{transform:scale(0.4);opacity:0;}70%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes stepIn{from{opacity:0;transform:translateY(16px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+</style>
+</helmet>
+<div dir="rtl" lang="he" style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:40px;background:oklch(0.9 0.01 60);">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" hint-size="412,892" style="flex:none;">
+
+<div style="display:flex;flex-direction:column;min-height:100%;background:oklch(0.985 0.004 60);color:oklch(0.24 0.015 50);">
+
+  <!-- ===== HOME HEADER ===== -->
+  <sc-if value="{{ isHome }}">
+    <div data-screen-label="בית" style="position:sticky;top:0;z-index:5;background:oklch(0.985 0.004 60);padding:22px 20px 4px;display:flex;align-items:center;gap:12px;">
+      <div style="width:46px;height:46px;border-radius:50%;background:{{ accentGrad }};display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:17px;flex:none;">א</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;color:oklch(0.52 0.012 50);">שלום אמא,</div>
+        <div style="font-size:17px;font-weight:700;">מה מבשלים היום?</div>
+      </div>
+      <button onClick="{{ goSearch }}" style="width:42px;height:42px;border-radius:50%;border:none;background:oklch(0.95 0.006 60);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="oklch(0.4 0.015 50)" stroke-width="1.8"/><line x1="15.3" y1="15.3" x2="20" y2="20" stroke="oklch(0.4 0.015 50)" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </sc-if>
+
+  <!-- ===== CATEGORY HEADER ===== -->
+  <sc-if value="{{ isCategory }}">
+    <div style="position:sticky;top:0;z-index:5;background:oklch(0.985 0.004 60);padding:18px 12px;border-bottom:1px solid oklch(0.9 0.01 60);display:flex;align-items:center;gap:8px;">
+      <button onClick="{{ goBack }}" style="width:40px;height:40px;border-radius:20px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:oklch(0.24 0.015 50);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="font-size:19px;font-weight:700;">{{ currentCategory.name }}</div>
+    </div>
+  </sc-if>
+
+  <!-- ===== RECIPE HEADER ===== -->
+  <sc-if value="{{ isRecipe }}">
+    <div data-screen-label="מתכון" style="position:sticky;top:0;z-index:5;background:oklch(0.985 0.004 60);padding:18px 12px;border-bottom:1px solid oklch(0.9 0.01 60);display:flex;align-items:center;gap:8px;">
+      <button onClick="{{ goBack }}" style="width:40px;height:40px;border-radius:20px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:oklch(0.24 0.015 50);flex:none;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="flex:1;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ currentRecipe.name }}</div>
+      <button onClick="{{ currentRecipe.toggleFav }}" style="width:40px;height:40px;border-radius:20px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;">
+        <sc-if value="{{ currentRecipe.isFav }}">
+          <svg width="21" height="21" viewBox="0 0 24 24"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.9-6.2 3.9 1.6-7L2 9.5l7.1-.6L12 2z" fill="oklch(0.62 0.13 35)"/></svg>
+        </sc-if>
+        <sc-if value="{{ currentRecipe.isFavOff }}" hint-placeholder-val="{{ true }}">
+          <svg width="21" height="21" viewBox="0 0 24 24"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.9-6.2 3.9 1.6-7L2 9.5l7.1-.6L12 2z" fill="none" stroke="oklch(0.5 0.02 50)" stroke-width="1.6"/></svg>
+        </sc-if>
+      </button>
+      <button onClick="{{ currentRecipe.edit }}" style="width:40px;height:40px;border-radius:20px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;color:oklch(0.24 0.015 50);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M14.5 3.5l2 2L7 15l-3 1 1-3 9.5-9.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </sc-if>
+
+  <!-- ===== EDIT HEADER (recipe) ===== -->
+  <sc-if value="{{ isEdit }}">
+    <div data-screen-label="הוספה/עריכה" style="position:sticky;top:0;z-index:5;background:oklch(0.985 0.004 60);padding:18px 12px;border-bottom:1px solid oklch(0.9 0.01 60);display:flex;align-items:center;gap:8px;">
+      <button onClick="{{ cancelEdit }}" style="width:40px;height:40px;border-radius:20px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:oklch(0.24 0.015 50);flex:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div style="flex:1;font-size:17px;font-weight:700;">
+        <sc-if value="{{ isNewRecipe }}">מתכון חדש</sc-if>
+        <sc-if value="{{ isEditExisting }}" hint-placeholder-val="{{ true }}">עריכת מתכון</sc-if>
+      </div>
+      <button onClick="{{ saveRecipe }}" style="height:38px;padding:0 16px;border-radius:19px;border:none;background:{{ accentGrad }};color:white;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;font-weight:600;flex:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5 11-11" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        שמירה
+      </button>
+    </div>
+  </sc-if>
+
+  <!-- ===== SEARCH HEADER ===== -->
+  <sc-if value="{{ isSearch }}">
+    <div data-screen-label="חיפוש" style="position:sticky;top:0;z-index:5;background:oklch(0.985 0.004 60);padding:20px 16px 12px;border-bottom:1px solid oklch(0.9 0.01 60);">
+      <div style="font-size:20px;font-weight:700;margin-bottom:12px;">חיפוש מתכון</div>
+      <div style="display:flex;align-items:center;gap:8px;background:white;border:1px solid oklch(0.9 0.01 60);border-radius:14px;padding:0 14px;height:46px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:none;color:oklch(0.55 0.01 50);"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"/><line x1="15.3" y1="15.3" x2="20" y2="20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input value="{{ query }}" onChange="{{ setQuery }}" placeholder="חפשי לפי שם מתכון..." style="flex:1;border:none;outline:none;font-size:15px;background:transparent;color:oklch(0.24 0.015 50);"/>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== FAVORITES HEADER ===== -->
+  <sc-if value="{{ isFavorites }}">
+    <div data-screen-label="מועדפים" style="position:sticky;top:0;z-index:5;background:oklch(0.985 0.004 60);padding:24px 20px 8px;border-bottom:1px solid oklch(0.9 0.01 60);">
+      <div style="font-size:22px;font-weight:700;">המתכונים המועדפים שלי</div>
+    </div>
+  </sc-if>
+
+  <!-- ===== PLANS (list) HEADER ===== -->
+  <sc-if value="{{ isPlans }}">
+    <div data-screen-label="תכנון" style="position:sticky;top:0;z-index:5;background:oklch(0.985 0.004 60);padding:24px 20px 8px;border-bottom:1px solid oklch(0.9 0.01 60);">
+      <div style="font-size:22px;font-weight:700;">תכנון ארוחות</div>
+      <div style="font-size:13.5px;color:oklch(0.52 0.012 50);margin-top:4px;">תכנני אירוח ובחרי מה יהיה על השולחן</div>
+    </div>
+  </sc-if>
+
+  <!-- ===== PLAN DETAIL HEADER ===== -->
+  <sc-if value="{{ isPlanDetail }}">
+    <div data-screen-label="אירוח" style="position:sticky;top:0;z-index:5;background:oklch(0.985 0.004 60);padding:18px 12px;border-bottom:1px solid oklch(0.9 0.01 60);display:flex;align-items:center;gap:8px;">
+      <button onClick="{{ goBack }}" style="width:40px;height:40px;border-radius:20px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:oklch(0.24 0.015 50);flex:none;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="flex:1;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ currentPlan.name }}</div>
+      <button onClick="{{ editCurrentPlan }}" style="width:38px;height:38px;border-radius:19px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;color:oklch(0.24 0.015 50);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14.5 3.5l2 2L7 15l-3 1 1-3 9.5-9.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      </button>
+      <button onClick="{{ deleteCurrentPlan }}" style="width:38px;height:38px;border-radius:19px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;color:oklch(0.55 0.14 25);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-9 0l1 12a1 1 0 001 1h6a1 1 0 001-1l1-12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </sc-if>
+
+  <!-- ===== PLAN EDIT HEADER ===== -->
+  <sc-if value="{{ isPlanEdit }}">
+    <div data-screen-label="עריכת אירוח" style="position:sticky;top:0;z-index:5;background:oklch(0.985 0.004 60);padding:18px 12px;border-bottom:1px solid oklch(0.9 0.01 60);display:flex;align-items:center;gap:8px;">
+      <button onClick="{{ cancelPlanEdit }}" style="width:40px;height:40px;border-radius:20px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:oklch(0.24 0.015 50);flex:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div style="flex:1;font-size:17px;font-weight:700;">
+        <sc-if value="{{ isNewPlan }}">אירוח חדש</sc-if>
+        <sc-if value="{{ isEditPlanExisting }}" hint-placeholder-val="{{ true }}">עריכת אירוח</sc-if>
+      </div>
+      <button onClick="{{ savePlan }}" style="height:38px;padding:0 16px;border-radius:19px;border:none;background:{{ accentGrad }};color:white;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;font-weight:600;flex:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5 11-11" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        שמירה
+      </button>
+    </div>
+  </sc-if>
+
+  <!-- ===== PLAN PICKER HEADER ===== -->
+  <sc-if value="{{ isPlanPicker }}">
+    <div data-screen-label="הוספת מתכונים" style="position:sticky;top:0;z-index:5;background:oklch(0.985 0.004 60);padding:18px 12px;border-bottom:1px solid oklch(0.9 0.01 60);display:flex;align-items:center;gap:8px;">
+      <button onClick="{{ goBack }}" style="width:40px;height:40px;border-radius:20px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:oklch(0.24 0.015 50);flex:none;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="flex:1;font-size:16px;font-weight:700;">הוספת מתכונים ל{{ currentPlan.name }}</div>
+    </div>
+  </sc-if>
+
+  <!-- ===== COOK MODE HEADER ===== -->
+  <sc-if value="{{ isCookMode }}">
+    <div data-screen-label="מצב הכנה" style="position:sticky;top:0;z-index:5;background:oklch(0.16 0.01 50);padding:18px 16px;display:flex;align-items:center;gap:10px;">
+      <button onClick="{{ exitCookMode }}" style="width:38px;height:38px;border-radius:19px;border:none;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;flex:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div style="flex:1;color:white;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ currentRecipe.name }}</div>
+      <div style="color:rgba(255,255,255,0.65);font-size:13px;font-weight:600;flex:none;">{{ cookProgressText }}</div>
+    </div>
+    <div style="height:4px;background:rgba(255,255,255,0.12);">
+      <div style="height:100%;width:{{ cookProgressPct }}%;background:{{ accentGrad }};transition:width 0.35s ease;"></div>
+    </div>
+  </sc-if>
+
+  <!-- ================= BODY ================= -->
+  <div style="flex:1;">
+
+    <!-- HOME BODY -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:8px;overflow-x:auto;padding:14px 20px 4px;">
+        <sc-for list="{{ categoriesView }}" as="chip" hint-placeholder-count="9">
+          <div onClick="{{ chip.open }}" style="flex:none;padding:8px 16px;border-radius:100px;font-size:13.5px;font-weight:600;cursor:pointer;background:{{ chip.tint }};color:{{ chip.tintText }};white-space:nowrap;">{{ chip.name }}</div>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 20px 20px;">
+        <sc-for list="{{ categoriesView }}" as="cat" hint-placeholder-count="9">
+          <div onClick="{{ cat.open }}" style="position:relative;background:{{ cat.tileBg }};border-radius:20px;padding:16px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;min-height:128px;box-shadow:0 10px 24px -12px oklch(0.3 0.05 60 / 0.4);transition:transform 0.15s ease;" style-active="transform:scale(0.96);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+              <div style="background:rgba(255,255,255,0.25);color:white;font-size:11px;font-weight:600;padding:4px 10px;border-radius:100px;">{{ cat.count }} מתכונים</div>
+              <div style="width:28px;height:28px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;flex:none;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <div style="font-size:17px;font-weight:700;color:white;">{{ cat.name }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- CATEGORY BODY: recipe list -->
+    <sc-if value="{{ isCategory }}">
+      <div style="display:flex;flex-direction:column;gap:14px;padding:16px;">
+        <sc-for list="{{ categoryRecipesView }}" as="r" hint-placeholder-count="3">
+          <div onClick="{{ r.open }}" style="position:relative;background:{{ r.grad }};border-radius:18px;padding:16px;cursor:pointer;min-height:96px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 10px 24px -14px oklch(0.3 0.05 60 / 0.45);transition:transform 0.15s ease;" style-active="transform:scale(0.97);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+              <button onClick="{{ r.toggleFav }}" style="width:28px;height:28px;border-radius:50%;background:white;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;transition:transform 0.15s ease;" style-active="transform:scale(0.8);">
+                <sc-if value="{{ r.isFav }}">
+                  <svg width="14" height="14" viewBox="0 0 24 24" style="animation:popIn 0.25s ease;"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.9-6.2 3.9 1.6-7L2 9.5l7.1-.6L12 2z" fill="#1a1a1a"/></svg>
+                </sc-if>
+                <sc-if value="{{ r.isFavOff }}" hint-placeholder-val="{{ true }}">
+                  <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.9-6.2 3.9 1.6-7L2 9.5l7.1-.6L12 2z" fill="none" stroke="#1a1a1a" stroke-width="1.6"/></svg>
+                </sc-if>
+              </button>
+              <div style="width:28px;height:28px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;flex:none;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:16px;font-weight:700;color:white;">{{ r.name }}</div>
+              <div style="font-size:12.5px;color:rgba(255,255,255,0.85);margin-top:3px;">{{ r.prepTime }}+{{ r.cookTime }} דק' &middot; {{ r.servings }} מנות</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- RECIPE BODY: detail -->
+    <sc-if value="{{ isRecipe }}">
+      <div style="padding:0 0 24px;">
+        <div style="margin:0 16px 18px;border-radius:20px;background:{{ currentRecipe.grad }};padding:20px;box-shadow:0 14px 28px -16px oklch(0.3 0.05 60 / 0.45);">
+          <div style="display:inline-block;font-size:12px;font-weight:600;color:white;background:rgba(255,255,255,0.25);padding:4px 12px;border-radius:100px;">{{ currentRecipe.categoryName }}</div>
+          <div style="font-size:23px;font-weight:700;margin-top:12px;color:white;">{{ currentRecipe.name }}</div>
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <div style="flex:1;background:rgba(255,255,255,0.2);border-radius:12px;padding:9px 6px;text-align:center;">
+              <div style="font-size:15px;font-weight:700;color:white;">{{ currentRecipe.servings }}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;">מנות</div>
+            </div>
+            <div style="flex:1;background:rgba(255,255,255,0.2);border-radius:12px;padding:9px 6px;text-align:center;">
+              <div style="font-size:15px;font-weight:700;color:white;">{{ currentRecipe.prepTime }}'</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;">הכנה</div>
+            </div>
+            <div style="flex:1;background:rgba(255,255,255,0.2);border-radius:12px;padding:9px 6px;text-align:center;">
+              <div style="font-size:15px;font-weight:700;color:white;">{{ currentRecipe.cookTime }}'</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;">בישול</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:0 20px;">
+          <button onClick="{{ startCookMode }}" style="width:100%;height:52px;border:none;border-radius:16px;background:oklch(0.16 0.01 50);color:white;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:22px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 4l14 8-14 8V4z" fill="white"/></svg>
+            מצב הכנה - שלב אחרי שלב
+          </button>
+
+          <div style="font-size:16px;font-weight:700;margin-bottom:10px;">רכיבים</div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <sc-for list="{{ currentRecipe.ingredientsView }}" as="ing" hint-placeholder-count="4">
+              <div onClick="{{ ing.toggle }}" style="display:flex;align-items:center;gap:12px;padding:9px 2px;cursor:pointer;">
+                <sc-if value="{{ ing.checked }}">
+                  <div style="width:22px;height:22px;border-radius:50%;background:{{ currentRecipe.solid }};flex:none;display:flex;align-items:center;justify-content:center;animation:popIn 0.25s ease;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5 11-11" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ ing.uncheckedFlag }}" hint-placeholder-val="{{ true }}">
+                  <div style="width:22px;height:22px;border-radius:50%;border:2px solid oklch(0.85 0.01 50);flex:none;"></div>
+                </sc-if>
+                <div style="font-size:15px;">{{ ing.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="font-size:16px;font-weight:700;margin-top:24px;margin-bottom:10px;">אופן ההכנה</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <sc-for list="{{ currentRecipe.stepsView }}" as="step" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px;">
+                <div style="width:26px;height:26px;border-radius:50%;background:{{ currentRecipe.tint }};color:{{ currentRecipe.solid }};font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;">{{ step.n }}</div>
+                <div style="font-size:15px;line-height:1.55;padding-top:2px;">{{ step.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:24px;background:{{ currentRecipe.tint }};border-radius:14px;padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:{{ currentRecipe.solid }};margin-bottom:6px;">הטיפ של אמא</div>
+            <div style="font-size:14.5px;line-height:1.55;color:oklch(0.3 0.015 50);">{{ currentRecipe.notes }}</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- COOK MODE BODY -->
+    <sc-if value="{{ isCookMode }}">
+      <div style="background:oklch(0.16 0.01 50);min-height:100%;display:flex;flex-direction:column;">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 28px 100px;text-align:center;gap:22px;">
+          <sc-if value="{{ isEvenCookStep }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:22px;animation:stepIn 0.4s ease;">
+              <div style="width:56px;height:56px;border-radius:50%;background:{{ accentGrad }};color:white;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;">{{ cookStep.n }}</div>
+              <div style="color:white;font-size:22px;line-height:1.6;font-weight:500;">{{ cookStep.text }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ isOddCookStep }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:22px;animation:stepIn 0.4s ease;">
+              <div style="width:56px;height:56px;border-radius:50%;background:{{ accentGrad }};color:white;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;">{{ cookStep.n }}</div>
+              <div style="color:white;font-size:22px;line-height:1.6;font-weight:500;">{{ cookStep.text }}</div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="position:sticky;bottom:0;padding:16px;display:flex;gap:10px;background:oklch(0.16 0.01 50);">
+          <sc-if value="{{ isFirstCookStep }}">
+            <div style="flex:1;height:54px;"></div>
+          </sc-if>
+          <sc-if value="{{ isFirstCookStepOff }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ prevCookStep }}" style="flex:1;height:54px;border-radius:16px;border:none;background:rgba(255,255,255,0.12);color:white;font-size:15px;font-weight:700;cursor:pointer;transition:transform 0.15s ease;" style-active="transform:scale(0.96);">שלב קודם</button>
+          </sc-if>
+          <sc-if value="{{ isLastCookStep }}">
+            <button onClick="{{ exitCookMode }}" style="flex:1;height:54px;border-radius:16px;border:none;background:{{ accentGrad }};color:white;font-size:15px;font-weight:700;cursor:pointer;transition:transform 0.15s ease;" style-active="transform:scale(0.96);">סיימתי לבשל</button>
+          </sc-if>
+          <sc-if value="{{ isLastCookStepOff }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ nextCookStep }}" style="flex:1;height:54px;border-radius:16px;border:none;background:{{ accentGrad }};color:white;font-size:15px;font-weight:700;cursor:pointer;transition:transform 0.15s ease;" style-active="transform:scale(0.96);">שלב הבא</button>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- SEARCH BODY -->
+    <sc-if value="{{ isSearch }}">
+      <div style="display:flex;flex-direction:column;gap:12px;padding:16px;">
+        <sc-for list="{{ searchResultsView }}" as="r" hint-placeholder-count="4">
+          <div onClick="{{ r.open }}" style="background:white;border:1px solid oklch(0.92 0.008 60);border-radius:16px;padding:12px;display:flex;gap:12px;align-items:center;cursor:pointer;">
+            <div style="width:56px;height:56px;border-radius:12px;flex:none;background:{{ r.grad }};"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</div>
+              <div style="font-size:12.5px;color:oklch(0.52 0.012 50);margin-top:3px;">{{ r.prepTime }}+{{ r.cookTime }} דק' &middot; {{ r.servings }} מנות</div>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noSearchResults }}">
+          <div style="text-align:center;padding:40px 20px;color:oklch(0.55 0.012 50);font-size:14.5px;">לא נמצאו מתכונים תואמים</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- FAVORITES BODY -->
+    <sc-if value="{{ isFavorites }}">
+      <div style="display:flex;flex-direction:column;gap:14px;padding:16px;">
+        <sc-if value="{{ hasFavorites }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ favoritesView }}" as="r" hint-placeholder-count="2">
+            <div onClick="{{ r.open }}" style="position:relative;background:{{ r.grad }};border-radius:18px;padding:16px;cursor:pointer;min-height:96px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 10px 24px -14px oklch(0.3 0.05 60 / 0.45);">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+                <button onClick="{{ r.toggleFav }}" style="width:28px;height:28px;border-radius:50%;background:white;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;">
+                  <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.9-6.2 3.9 1.6-7L2 9.5l7.1-.6L12 2z" fill="#1a1a1a"/></svg>
+                </button>
+                <div style="width:28px;height:28px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;flex:none;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:16px;font-weight:700;color:white;">{{ r.name }}</div>
+                <div style="font-size:12.5px;color:rgba(255,255,255,0.85);margin-top:3px;">{{ r.prepTime }}+{{ r.cookTime }} דק' &middot; {{ r.servings }} מנות</div>
+              </div>
+            </div>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ noFavorites }}">
+          <div style="text-align:center;padding:60px 24px;color:oklch(0.55 0.012 50);font-size:14.5px;line-height:1.6;">
+            עוד לא סימנת מתכונים מועדפים.<br/>לחצי על הכוכב ליד מתכון כדי לשמור אותו כאן.
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- PLANS BODY: list of hostings -->
+    <sc-if value="{{ isPlans }}">
+      <div style="display:flex;flex-direction:column;gap:12px;padding:16px;">
+        <button onClick="{{ startAddPlan }}" style="border:none;background:{{ accentGrad }};color:white;border-radius:16px;height:52px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="white" stroke-width="2.3" stroke-linecap="round"/></svg>
+          אירוח חדש
+        </button>
+
+        <sc-if value="{{ hasPlans }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ plansView }}" as="p" hint-placeholder-count="2">
+            <div onClick="{{ p.open }}" style="background:white;border:1px solid oklch(0.92 0.008 60);border-radius:16px;padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:16px;font-weight:700;">{{ p.name }}</div>
+                <sc-if value="{{ p.hasDate }}">
+                  <div style="font-size:12.5px;color:oklch(0.52 0.012 50);">{{ p.date }}</div>
+                </sc-if>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <div style="background:oklch(0.95 0.006 60);border-radius:100px;padding:5px 12px;font-size:12.5px;color:oklch(0.4 0.015 50);font-weight:600;">{{ p.guests }} סועדים</div>
+                <div style="background:oklch(0.95 0.006 60);border-radius:100px;padding:5px 12px;font-size:12.5px;color:oklch(0.4 0.015 50);font-weight:600;">{{ p.recipeCount }} מתכונים</div>
+              </div>
+            </div>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ noPlans }}">
+          <div style="text-align:center;padding:40px 24px;color:oklch(0.55 0.012 50);font-size:14.5px;line-height:1.6;">
+            עוד לא תכננת ארוחה. לחצי על "אירוח חדש" כדי להתחיל.
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- PLAN DETAIL BODY -->
+    <sc-if value="{{ isPlanDetail }}">
+      <div style="padding:16px;display:flex;flex-direction:column;gap:18px;">
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;background:oklch(0.95 0.006 60);border-radius:14px;padding:14px;text-align:center;">
+            <div style="font-size:19px;font-weight:700;">{{ currentPlan.guests }}</div>
+            <div style="font-size:12px;color:oklch(0.52 0.012 50);margin-top:2px;">סועדים</div>
+          </div>
+          <div style="flex:1;background:oklch(0.95 0.006 60);border-radius:14px;padding:14px;text-align:center;">
+            <div style="font-size:19px;font-weight:700;">{{ currentPlan.recipeCount }}</div>
+            <div style="font-size:12px;color:oklch(0.52 0.012 50);margin-top:2px;">מתכונים</div>
+          </div>
+          <sc-if value="{{ currentPlan.hasDate }}">
+            <div style="flex:1;background:oklch(0.95 0.006 60);border-radius:14px;padding:14px;text-align:center;">
+              <div style="font-size:15px;font-weight:700;">{{ currentPlan.date }}</div>
+              <div style="font-size:12px;color:oklch(0.52 0.012 50);margin-top:2px;">תאריך</div>
+            </div>
+          </sc-if>
+        </div>
+
+        <button onClick="{{ openPlanPicker }}" style="border:1px dashed {{ accentTintBorder }};background:{{ accentTint }};color:{{ accentSolid }};border-radius:14px;height:48px;font-size:14.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg>
+          הוספת מתכונים לאירוח
+        </button>
+
+        <sc-if value="{{ currentPlan.hasRecipes }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ currentPlan.recipesView }}" as="r" hint-placeholder-count="3">
+              <div style="background:white;border:1px solid oklch(0.92 0.008 60);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center;">
+                <div onClick="{{ r.open }}" style="width:48px;height:48px;border-radius:10px;flex:none;background:{{ r.grad }};cursor:pointer;"></div>
+                <div onClick="{{ r.open }}" style="flex:1;min-width:0;cursor:pointer;">
+                  <div style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</div>
+                  <div style="font-size:12px;color:oklch(0.52 0.012 50);margin-top:2px;">{{ r.categoryName }}</div>
+                </div>
+                <button onClick="{{ r.remove }}" style="width:32px;height:32px;flex:none;border:none;background:oklch(0.95 0.006 60);border-radius:10px;color:oklch(0.5 0.012 50);cursor:pointer;font-size:16px;">&times;</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ currentPlan.noRecipes }}">
+          <div style="text-align:center;padding:24px;color:oklch(0.55 0.012 50);font-size:14px;">עדיין לא נוספו מתכונים לאירוח הזה</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- PLAN PICKER BODY -->
+    <sc-if value="{{ isPlanPicker }}">
+      <div style="display:flex;flex-direction:column;gap:10px;padding:16px;">
+        <sc-for list="{{ planPickerRecipesView }}" as="r" hint-placeholder-count="6">
+          <div onClick="{{ r.toggle }}" style="background:white;border:1px solid oklch(0.92 0.008 60);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center;cursor:pointer;">
+            <div style="width:44px;height:44px;border-radius:10px;flex:none;background:{{ r.grad }};"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</div>
+              <div style="font-size:12px;color:oklch(0.52 0.012 50);margin-top:2px;">{{ r.categoryName }}</div>
+            </div>
+            <sc-if value="{{ r.included }}">
+              <div style="width:26px;height:26px;border-radius:50%;background:{{ r.solid }};flex:none;display:flex;align-items:center;justify-content:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5 11-11" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </sc-if>
+            <sc-if value="{{ r.notIncluded }}" hint-placeholder-val="{{ true }}">
+              <div style="width:26px;height:26px;border-radius:50%;border:2px solid oklch(0.85 0.01 50);flex:none;"></div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- EDIT BODY: recipe form -->
+    <sc-if value="{{ isEdit }}">
+      <div style="padding:18px 20px 32px;display:flex;flex-direction:column;gap:18px;">
+
+        <div>
+          <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);margin-bottom:6px;">שם המתכון</div>
+          <input value="{{ editing.name }}" onChange="{{ updateName }}" placeholder="לדוגמה: מרק עוף עם קניידלך" style="width:100%;height:46px;border:1px solid oklch(0.88 0.008 60);border-radius:12px;padding:0 14px;font-size:15px;outline:none;"/>
+        </div>
+
+        <div>
+          <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);margin-bottom:8px;">קטגוריה</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <sc-for list="{{ categoryChipsView }}" as="c" hint-placeholder-count="9">
+              <sc-if value="{{ c.selected }}">
+                <div onClick="{{ c.select }}" style="padding:8px 14px;border-radius:100px;font-size:13.5px;font-weight:600;cursor:pointer;background:{{ c.solid }};color:white;">{{ c.name }}</div>
+              </sc-if>
+              <sc-if value="{{ c.unselectedFlag }}" hint-placeholder-val="{{ true }}">
+                <div onClick="{{ c.select }}" style="padding:8px 14px;border-radius:100px;font-size:13.5px;font-weight:600;cursor:pointer;background:white;border:1px solid oklch(0.88 0.008 60);color:oklch(0.4 0.015 50);">{{ c.name }}</div>
+              </sc-if>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);margin-bottom:6px;">מנות</div>
+            <input type="number" value="{{ editing.servings }}" onChange="{{ updateServings }}" style="width:100%;height:46px;border:1px solid oklch(0.88 0.008 60);border-radius:12px;padding:0 12px;font-size:15px;outline:none;"/>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);margin-bottom:6px;">הכנה (דק')</div>
+            <input type="number" value="{{ editing.prepTime }}" onChange="{{ updatePrep }}" style="width:100%;height:46px;border:1px solid oklch(0.88 0.008 60);border-radius:12px;padding:0 12px;font-size:15px;outline:none;"/>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);margin-bottom:6px;">בישול (דק')</div>
+            <input type="number" value="{{ editing.cookTime }}" onChange="{{ updateCook }}" style="width:100%;height:46px;border:1px solid oklch(0.88 0.008 60);border-radius:12px;padding:0 12px;font-size:15px;outline:none;"/>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);">רכיבים</div>
+            <button onClick="{{ addIngredient }}" style="border:none;background:transparent;color:{{ accentSolid }};font-size:13px;font-weight:600;cursor:pointer;">+ הוספת רכיב</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ editIngredientsView }}" as="ing" hint-placeholder-count="3">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input value="{{ ing.val }}" onChange="{{ ing.onChange }}" placeholder="לדוגמה: 2 כוסות קמח" style="flex:1;height:44px;border:1px solid oklch(0.88 0.008 60);border-radius:12px;padding:0 14px;font-size:14.5px;outline:none;"/>
+                <button onClick="{{ ing.remove }}" style="width:36px;height:36px;flex:none;border:none;background:oklch(0.94 0.008 60);border-radius:10px;color:oklch(0.5 0.012 50);cursor:pointer;font-size:18px;">&times;</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);">אופן ההכנה</div>
+            <button onClick="{{ addStep }}" style="border:none;background:transparent;color:{{ accentSolid }};font-size:13px;font-weight:600;cursor:pointer;">+ הוספת שלב</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ editStepsView }}" as="step" hint-placeholder-count="3">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div style="width:26px;height:26px;border-radius:50%;background:oklch(0.94 0.008 60);color:oklch(0.4 0.015 50);font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;">{{ step.n }}</div>
+                <input value="{{ step.val }}" onChange="{{ step.onChange }}" placeholder="תארי את השלב..." style="flex:1;height:44px;border:1px solid oklch(0.88 0.008 60);border-radius:12px;padding:0 14px;font-size:14.5px;outline:none;"/>
+                <button onClick="{{ step.remove }}" style="width:36px;height:36px;flex:none;border:none;background:oklch(0.94 0.008 60);border-radius:10px;color:oklch(0.5 0.012 50);cursor:pointer;font-size:18px;">&times;</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);margin-bottom:6px;">הטיפ של אמא</div>
+          <textarea value="{{ editing.notes }}" onChange="{{ updateNotes }}" placeholder="טיפ אישי, תחליף למצרך, או סוד קטן..." style="width:100%;min-height:80px;border:1px solid oklch(0.88 0.008 60);border-radius:12px;padding:12px 14px;font-size:14.5px;outline:none;resize:none;"></textarea>
+        </div>
+
+      </div>
+    </sc-if>
+
+    <!-- PLAN EDIT BODY: hosting form -->
+    <sc-if value="{{ isPlanEdit }}">
+      <div style="padding:18px 20px 32px;display:flex;flex-direction:column;gap:18px;">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);margin-bottom:6px;">שם האירוח</div>
+          <input value="{{ editingPlan.name }}" onChange="{{ updatePlanName }}" placeholder="לדוגמה: שישי משפחתי" style="width:100%;height:46px;border:1px solid oklch(0.88 0.008 60);border-radius:12px;padding:0 14px;font-size:15px;outline:none;"/>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);margin-bottom:6px;">כמה סועדים</div>
+            <input type="number" value="{{ editingPlan.guests }}" onChange="{{ updatePlanGuests }}" style="width:100%;height:46px;border:1px solid oklch(0.88 0.008 60);border-radius:12px;padding:0 12px;font-size:15px;outline:none;"/>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:oklch(0.5 0.012 50);margin-bottom:6px;">תאריך (לא חובה)</div>
+            <input value="{{ editingPlan.date }}" onChange="{{ updatePlanDate }}" placeholder="לדוגמה: יום שישי" style="width:100%;height:46px;border:1px solid oklch(0.88 0.008 60);border-radius:12px;padding:0 12px;font-size:15px;outline:none;"/>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- ================= BOTTOM TABS (floating pill) ================= -->
+  <sc-if value="{{ showTabs }}">
+    <div style="position:sticky;bottom:0;z-index:5;padding:0 12px 16px;">
+      <div style="background:white;border-radius:100px;box-shadow:0 12px 28px -10px oklch(0.3 0.05 60 / 0.35);display:flex;align-items:flex-end;justify-content:space-around;padding:8px 4px 10px;">
+
+        <button onClick="{{ goHome }}" style="background:transparent;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;width:52px;color:{{ homeColor }};transition:color 0.2s ease,transform 0.15s ease;" style-active="transform:scale(0.85);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1v-9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span style="font-size:10px;font-weight:600;">בית</span>
+        </button>
+
+        <button onClick="{{ goSearch }}" style="background:transparent;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;width:52px;color:{{ searchColor }};transition:color 0.2s ease,transform 0.15s ease;" style-active="transform:scale(0.85);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"/><line x1="15.3" y1="15.3" x2="20" y2="20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span style="font-size:10px;font-weight:600;">חיפוש</span>
+        </button>
+
+        <button onClick="{{ startAddRecipe }}" style="background:transparent;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;width:52px;margin-top:-26px;transition:transform 0.15s ease;" style-active="transform:scale(0.88);">
+          <div style="width:50px;height:50px;border-radius:50%;background:{{ accentGrad }};display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px -4px color-mix(in oklch, {{ accentSolid }} 55%, transparent);border:4px solid white;transition:transform 0.15s ease;">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="white" stroke-width="2.3" stroke-linecap="round"/></svg>
+          </div>
+        </button>
+
+        <button onClick="{{ goPlans }}" style="background:transparent;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;width:52px;color:{{ plansColor }};transition:color 0.2s ease,transform 0.15s ease;" style-active="transform:scale(0.85);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/><line x1="7.5" y1="9" x2="16.5" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="7.5" y1="12.5" x2="16.5" y2="12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="7.5" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span style="font-size:10px;font-weight:600;">תכנון</span>
+        </button>
+
+        <button onClick="{{ goFavorites }}" style="background:transparent;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;width:52px;color:{{ favColor }};transition:color 0.2s ease,transform 0.15s ease;" style-active="transform:scale(0.85);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="{{ favIconFill }}"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.9-6.2 3.9 1.6-7L2 9.5l7.1-.6L12 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <span style="font-size:10px;font-weight:600;">מועדפים</span>
+        </button>
+
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accentPalette&quot;: {&quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: [&quot;#C1583D&quot;, &quot;#DA8A4E&quot;], &quot;options&quot;: [[&quot;#C1583D&quot;, &quot;#DA8A4E&quot;], [&quot;#B23A55&quot;, &quot;#E0708C&quot;], [&quot;#3E7A5C&quot;, &quot;#79B98C&quot;], [&quot;#3B6EA5&quot;, &quot;#6FA8D8&quot;], [&quot;#7A5C9E&quot;, &quot;#B18FCB&quot;], [&quot;#B8862E&quot;, &quot;#E0B04E&quot;]], &quot;tsType&quot;: &quot;string[]&quot;, &quot;section&quot;: &quot;Colors&quot;}}">
+function hueGrad(h) { return 'linear-gradient(135deg, oklch(0.56 0.15 ' + h + '), oklch(0.68 0.15 ' + (h + 25) + '))'; }
+function hueSolid(h) { return 'oklch(0.5 0.14 ' + h + ')'; }
+function hueTint(h) { return 'oklch(0.95 0.025 ' + h + ')'; }
+function hueTintText(h) { return 'oklch(0.4 0.09 ' + h + ')'; }
+
+const CATEGORIES = [
+  { id: 'soups', name: 'מרקים', hue: 25, image: 'images/soup.png' },
+  { id: 'mains', name: 'עיקריות', hue: 260 },
+  { id: 'pastries', name: 'פשטידות', hue: 95 },
+  { id: 'cakes', name: 'עוגות', hue: 330 },
+  { id: 'salads', name: 'סלטים', hue: 145 },
+  { id: 'chicken', name: 'עוף', hue: 60 },
+  { id: 'meat', name: 'בשר', hue: 10 },
+  { id: 'veg', name: 'צמחוני', hue: 175 },
+  { id: 'kids', name: 'ילדים', hue: 300 },
+];
+
+const INITIAL_RECIPES = [
+  { id: 'soup-chicken', name: 'מרק עוף עם קניידלך', categoryId: 'soups', servings: 6, prepTime: 20, cookTime: 90,
+    ingredients: ['עוף שלם', 'גזר וסלרי', 'בצל גדול', 'פטרוזיליה ושמיר', 'קמח מצה לקניידלך'],
+    steps: ['שוטפים את העוף ומניחים בסיר גדול עם מים.', 'מוסיפים את הירקות ומביאים לרתיחה, ואז מנמיכים לאש קטנה לשעה וחצי.', 'מסננים את המרק ומתבלים במלח ופלפל.', 'מוסיפים את הקניידלך ומבשלים עוד 15 דקות.'],
+    notes: 'ככל שהמרק מתבשל לאט יותר, כך הוא טעים יותר - אל תמהרי!' },
+  { id: 'soup-veg', name: 'מרק ירקות', categoryId: 'soups', servings: 4, prepTime: 15, cookTime: 40,
+    ingredients: ['תפוחי אדמה', 'גזר', 'קישוא', 'בצל', 'עגבניות'],
+    steps: ['קוצצים את כל הירקות לקוביות.', 'מטגנים קלות את הבצל בסיר.', 'מוסיפים את שאר הירקות ומכסים במים.', 'מבשלים כ-40 דקות עד שהירקות רכים.'],
+    notes: 'אפשר להוסיף כל ירק שיש במקרר - זה תמיד יוצא טעים.' },
+
+  { id: 'mains-pasta', name: 'פסטה ברוטב עגבניות', categoryId: 'mains', servings: 4, prepTime: 10, cookTime: 25,
+    ingredients: ['פסטה', 'עגבניות מרוסקות', 'שום', 'בזיליקום', 'שמן זית'],
+    steps: ['מבשלים את הפסטה לפי ההוראות על האריזה.', 'מטגנים שום בשמן זית עד שמתקבל ריח.', 'מוסיפים עגבניות ומבשלים 15 דקות.', 'מערבבים עם הפסטה ומפזרים בזיליקום.'],
+    notes: 'טיפה סוכר ברוטב מאזנת את החומציות של העגבניות.' },
+  { id: 'mains-schnitzel', name: 'שניצל בתנור', categoryId: 'mains', servings: 4, prepTime: 15, cookTime: 30,
+    ingredients: ['חזה עוף', 'ביצים', 'פירורי לחם', 'פפריקה', 'מלח'],
+    steps: ['פורסים את החזה לשניצלים דקים.', 'טובלים בביצה ואז בפירורי לחם.', 'מסדרים על תבנית עם נייר אפייה.', 'אופים ב-200 מעלות כ-30 דקות עד הזהבה.'],
+    notes: 'לפריכות כפולה - מרססים קצת שמן על השניצלים לפני האפייה.' },
+  { id: 'mains-rice-lentils', name: 'אורז ועדשים', categoryId: 'mains', servings: 4, prepTime: 10, cookTime: 35,
+    ingredients: ['אורז', 'עדשים חומות', 'בצל מטוגן', 'כמון', 'שמן'],
+    steps: ['שוטפים את העדשים והאורז בנפרד.', 'מבשלים את העדשים כ-15 דקות מראש.', 'מוסיפים את האורז והתבלינים וממשיכים לבשל.', 'מגישים עם בצל מטוגן פריך למעלה.'],
+    notes: 'זו הייתה המנה שסבתא הכינה כל יום שישי.' },
+
+  { id: 'pastry-potato', name: 'פשטידת תפוחי אדמה', categoryId: 'pastries', servings: 8, prepTime: 20, cookTime: 45,
+    ingredients: ['תפוחי אדמה', 'ביצים', 'גבינה צהובה', 'שמנת חמוצה', 'בצל ירוק'],
+    steps: ['מבשלים ומרסקים את תפוחי האדמה.', 'מערבבים עם ביצים, גבינה ושמנת.', 'יוצקים לתבנית משומנת.', 'אופים ב-180 מעלות כ-45 דקות עד שמזהיב.'],
+    notes: 'אפשר להכין יום לפני - היא רק משתפרת בטעם.' },
+  { id: 'pastry-zucchini', name: 'פשטידת קישואים', categoryId: 'pastries', servings: 8, prepTime: 15, cookTime: 40,
+    ingredients: ['קישואים מגוררים', 'ביצים', 'קמח', 'גבינה מגוררת', 'נענע'],
+    steps: ['מגררים את הקישואים וסוחטים עודף נוזלים.', 'מערבבים עם שאר המרכיבים לתערובת אחידה.', 'יוצקים לתבנית אפייה.', 'אופים כ-40 דקות עד שהמרכז יציב.'],
+    notes: 'סחיטת הנוזלים מהקישוא זה הסוד לפשטידה לא רטובה.' },
+
+  { id: 'cake-chocolate', name: 'עוגת שוקולד', categoryId: 'cakes', servings: 10, prepTime: 20, cookTime: 40,
+    ingredients: ['קמח', 'קקאו', 'סוכר', 'ביצים', 'שמן'],
+    steps: ['מערבבים את היבשים בקערה אחת.', 'מוסיפים ביצים, שמן ומים רותחים.', 'מערבבים עד לתערובת חלקה.', 'אופים בתבנית משומנת כ-40 דקות ב-170 מעלות.'],
+    notes: 'המים הרותחים הם הסוד לעוגה רכה במיוחד.' },
+  { id: 'cake-cheese', name: 'עוגת גבינה', categoryId: 'cakes', servings: 10, prepTime: 25, cookTime: 50,
+    ingredients: ['גבינת שמנת', 'ביצים', 'סוכר', 'ביסקוויטים למצע', 'חמאה'],
+    steps: ['מכינים מצע ביסקוויטים עם חמאה מומסת.', 'טורפים את הגבינה עם הסוכר והביצים.', 'יוצקים על המצע.', 'אופים באמבט מים כ-50 דקות.'],
+    notes: 'חשוב להוציא את הגבינה מהמקרר שעה לפני - כך אין גושים.' },
+  { id: 'cake-apple', name: 'עוגת תפוחים', categoryId: 'cakes', servings: 8, prepTime: 20, cookTime: 45,
+    ingredients: ['תפוחים', 'קמח', 'קינמון', 'סוכר', 'ביצים'],
+    steps: ['פורסים את התפוחים לפלחים דקים.', 'מכינים בלילה מהמרכיבים היבשים והרטובים.', 'מסדרים שכבות של בלילה ותפוחים בתבנית.', 'אופים ב-170 מעלות כ-45 דקות.'],
+    notes: 'קינמון נדיב זה הסוד - אל תפחדי ממנו.' },
+
+  { id: 'salad-classic', name: 'סלט ירקות קלאסי', categoryId: 'salads', servings: 4, prepTime: 10, cookTime: 0,
+    ingredients: ['עגבניות', 'מלפפונים', 'בצל סגול', 'לימון', 'שמן זית'],
+    steps: ['קוצצים את כל הירקות לקוביות קטנות.', 'מערבבים בקערה.', 'מתבלים במיץ לימון, שמן זית ומלח.', 'מגישים טרי.'],
+    notes: 'לימון סוחט טרי עושה את כל ההבדל.' },
+  { id: 'salad-quinoa', name: 'סלט קינואה', categoryId: 'salads', servings: 4, prepTime: 15, cookTime: 15,
+    ingredients: ['קינואה', 'מלפפון', 'עגבניות שרי', 'פטרוזיליה', 'שמן זית'],
+    steps: ['מבשלים את הקינואה ומצננים.', 'קוצצים את הירקות והעשבים.', 'מערבבים הכל יחד.', 'מתבלים לפי הטעם.'],
+    notes: 'מצוין להכנה מראש - נשמר טוב במקרר.' },
+
+  { id: 'chicken-oven', name: 'עוף בתנור עם תפוחי אדמה', categoryId: 'chicken', servings: 4, prepTime: 15, cookTime: 60,
+    ingredients: ['שוקיים עוף', 'תפוחי אדמה', 'שום', 'רוזמרין', 'שמן זית'],
+    steps: ['מסדרים את העוף ותפוחי האדמה בתבנית.', 'מתבלים בשמן זית, שום ורוזמרין.', 'אופים ב-200 מעלות כשעה.', 'הופכים באמצע לצליית שני הצדדים.'],
+    notes: 'שכבת עור פריכה מתקבלת כשמייבשים את העוף לפני התיבול.' },
+  { id: 'chicken-thighs', name: 'כרעיים ברוטב', categoryId: 'chicken', servings: 4, prepTime: 10, cookTime: 45,
+    ingredients: ['כרעיים עוף', 'בצל', 'רסק עגבניות', 'פפריקה', 'דבש'],
+    steps: ['מטגנים את הבצל עד להזהבה.', 'מוסיפים את הכרעיים וצורבים קלות.', 'מוסיפים רסק עגבניות ותבלינים ומכסים במים.', 'מבשלים על אש נמוכה 45 דקות.'],
+    notes: 'כפית דבש ברוטב נותנת מתיקות עדינה נהדרת.' },
+
+  { id: 'meat-meatballs', name: 'קציצות ברוטב עגבניות', categoryId: 'meat', servings: 4, prepTime: 20, cookTime: 35,
+    ingredients: ['בשר טחון', 'בצל', 'פירורי לחם', 'ביצה', 'רסק עגבניות'],
+    steps: ['מערבבים את הבשר עם הבצל, הביצה ופירורי הלחם.', 'מעצבים כדורים קטנים.', 'מכינים רוטב עגבניות בסיר.', 'מבשלים את הקציצות ברוטב 35 דקות.'],
+    notes: 'לחות הבשר עם היד קרה - כך הקציצות נשארות רכות.' },
+  { id: 'meat-roast', name: 'צלי בקר', categoryId: 'meat', servings: 6, prepTime: 15, cookTime: 120,
+    ingredients: ['צלי כתף', 'בצל', 'גזר', 'יין אדום', 'עשבי תיבול'],
+    steps: ['צורבים את הבשר מכל הצדדים בסיר.', 'מוסיפים בצל וגזר וממשיכים לטגן.', 'מוסיפים יין ומים ומביאים לרתיחה.', 'מבשלים על אש נמוכה כשעתיים עד שהבשר רך.'],
+    notes: 'ככל שמבשלים לאט ובסבלנות, הבשר נמס בפה.' },
+
+  { id: 'veg-stew', name: 'תבשיל ירקות', categoryId: 'veg', servings: 4, prepTime: 15, cookTime: 35,
+    ingredients: ['חצילים', 'קישואים', 'פלפלים', 'עגבניות', 'שום'],
+    steps: ['קוצצים את כל הירקות לקוביות בינוניות.', 'מטגנים שום בשמן עד ריח נעים.', 'מוסיפים את הירקות ומכסים.', 'מבשלים על אש נמוכה כ-35 דקות.'],
+    notes: 'טעים במיוחד ביום שאחרי - הטעמים מתערבבים.' },
+  { id: 'veg-shakshuka', name: 'שקשוקה', categoryId: 'veg', servings: 2, prepTime: 10, cookTime: 20,
+    ingredients: ['עגבניות', 'ביצים', 'פלפל', 'בצל', 'פפריקה מתוקה'],
+    steps: ['מטגנים בצל ופלפל עד להתרככות.', 'מוסיפים עגבניות ומבשלים 10 דקות.', 'יוצרים גומות ושוברים לתוכן ביצים.', 'מכסים ומבשלים עד שהביצים מוכנות לטעמכם.'],
+    notes: 'מגישות עם פרוסת לחם טרייה לספוג את הרוטב.' },
+
+  { id: 'kids-pancake', name: 'פנקייק', categoryId: 'kids', servings: 4, prepTime: 10, cookTime: 15,
+    ingredients: ['קמח', 'חלב', 'ביצה', 'סוכר', 'אבקת אפייה'],
+    steps: ['מערבבים את כל המרכיבים לבלילה חלקה.', 'מחממים מחבת עם מעט שמן.', 'יוצקים מנות קטנות ומטגנים משני הצדדים.', 'מגישים עם דבש או ריבה.'],
+    notes: 'הילדים אוהבים לעזור לערבב את הבלילה - תנו להם לנסות.' },
+  { id: 'kids-pasta-cheese', name: 'פסטה עם גבינה', categoryId: 'kids', servings: 2, prepTime: 5, cookTime: 15,
+    ingredients: ['פסטה קטנה', 'גבינה צהובה', 'חמאה', 'חלב'],
+    steps: ['מבשלים את הפסטה לפי ההוראות.', 'ממיסים חמאה וגבינה עם קצת חלב.', 'מערבבים עם הפסטה החמה.', 'מגישים מיד.'],
+    notes: 'מנה בטוחה כשהילדים לא במצב רוח להרפתקאות.' },
+];
+
+class Component extends DCLogic {
+  state = {
+    screen: 'home',
+    categoryId: null,
+    recipeId: null,
+    query: '',
+    favorites: {},
+    recipes: INITIAL_RECIPES,
+    editingRecipe: null,
+    isNewRecipe: false,
+    checkedIngredients: {},
+    cookStepIndex: 0,
+    plans: [],
+    planId: null,
+    editingPlan: null,
+    isNewPlan: false,
+    stack: [],
+  };
+
+  push(extra) {
+    return (s) => ({
+      stack: [...s.stack, { screen: s.screen, categoryId: s.categoryId, recipeId: s.recipeId, planId: s.planId }],
+      ...extra,
+    });
+  }
+  goBack() {
+    this.setState(s => {
+      const st = [...s.stack];
+      const prev = st.pop();
+      if (!prev) return { screen: 'home', categoryId: null, recipeId: null, planId: null, editingRecipe: null, editingPlan: null, stack: [] };
+      return { ...prev, stack: st, editingRecipe: null, editingPlan: null };
+    });
+  }
+  goHome() { this.setState({ screen: 'home', stack: [], categoryId: null, recipeId: null }); }
+  goSearch() { this.setState({ screen: 'search', stack: [] }); }
+  goFavorites() { this.setState({ screen: 'favorites', stack: [] }); }
+  goPlans() { this.setState({ screen: 'plans', stack: [] }); }
+
+  openCategory(id) { this.setState(this.push({ screen: 'category', categoryId: id, recipeId: null, editingRecipe: null })); }
+  openRecipe(id) { this.setState(s => ({ ...this.push({ screen: 'recipe', recipeId: id, editingRecipe: null })(s), checkedIngredients: {} })); }
+
+  toggleFavorite(id) {
+    this.setState(s => ({ favorites: { ...s.favorites, [id]: !s.favorites[id] } }));
+  }
+  toggleIngredientCheck(i) {
+    this.setState(s => ({ checkedIngredients: { ...s.checkedIngredients, [i]: !s.checkedIngredients[i] } }));
+  }
+  setQuery(v) { this.setState({ query: v }); }
+
+  startAddRecipe() {
+    this.setState(this.push({
+      screen: 'edit',
+      editingRecipe: { id: null, name: '', categoryId: CATEGORIES[0].id, servings: 4, prepTime: 15, cookTime: 30, ingredients: [''], steps: [''], notes: '' },
+      isNewRecipe: true,
+    }));
+  }
+  startEditRecipe(recipe) {
+    this.setState(this.push({ screen: 'edit', editingRecipe: JSON.parse(JSON.stringify(recipe)), isNewRecipe: false }));
+  }
+  cancelEdit() { this.goBack(); }
+
+  saveRecipe() {
+    this.setState(s => {
+      const rec = s.editingRecipe;
+      const cleanRec = { ...rec, ingredients: rec.ingredients.filter(x => x.trim()), steps: rec.steps.filter(x => x.trim()) };
+      let recipes;
+      if (s.isNewRecipe) {
+        recipes = [...s.recipes, { ...cleanRec, id: 'r' + Date.now() }];
+      } else {
+        recipes = s.recipes.map(r => r.id === rec.id ? cleanRec : r);
+      }
+      return { recipes };
+    });
+    this.goBack();
+  }
+
+  updateField(key, value) { this.setState(s => ({ editingRecipe: { ...s.editingRecipe, [key]: value } })); }
+  updateIngredient(i, v) { this.setState(s => { const arr = [...s.editingRecipe.ingredients]; arr[i] = v; return { editingRecipe: { ...s.editingRecipe, ingredients: arr } }; }); }
+  addIngredient() { this.setState(s => ({ editingRecipe: { ...s.editingRecipe, ingredients: [...s.editingRecipe.ingredients, ''] } })); }
+  removeIngredient(i) { this.setState(s => { const arr = s.editingRecipe.ingredients.filter((_, idx) => idx !== i); return { editingRecipe: { ...s.editingRecipe, ingredients: arr.length ? arr : [''] } }; }); }
+  updateStep(i, v) { this.setState(s => { const arr = [...s.editingRecipe.steps]; arr[i] = v; return { editingRecipe: { ...s.editingRecipe, steps: arr } }; }); }
+  addStep() { this.setState(s => ({ editingRecipe: { ...s.editingRecipe, steps: [...s.editingRecipe.steps, ''] } })); }
+  removeStep(i) { this.setState(s => { const arr = s.editingRecipe.steps.filter((_, idx) => idx !== i); return { editingRecipe: { ...s.editingRecipe, steps: arr.length ? arr : [''] } }; }); }
+
+  startCookMode() { this.setState(this.push({ screen: 'cookMode', cookStepIndex: 0 })); }
+  nextCookStep() { this.setState(s => ({ cookStepIndex: Math.min(s.cookStepIndex + 1, this.state.recipes.find(r => r.id === s.recipeId).steps.length - 1) })); }
+  prevCookStep() { this.setState(s => ({ cookStepIndex: Math.max(s.cookStepIndex - 1, 0) })); }
+
+  openPlan(id) { this.setState(this.push({ screen: 'planDetail', planId: id })); }
+  openPlanPicker() { this.setState(this.push({ screen: 'planPicker' })); }
+
+  startAddPlan() {
+    this.setState(this.push({
+      screen: 'planEdit',
+      editingPlan: { id: null, name: '', guests: 4, date: '' },
+      isNewPlan: true,
+    }));
+  }
+  editCurrentPlan() {
+    this.setState(s => {
+      const plan = s.plans.find(p => p.id === s.planId);
+      return this.push({ screen: 'planEdit', editingPlan: { ...plan }, isNewPlan: false })(s);
+    });
+  }
+  cancelPlanEdit() { this.goBack(); }
+
+  savePlan() {
+    this.setState(s => {
+      const ep = s.editingPlan;
+      let plans;
+      if (s.isNewPlan) {
+        plans = [...s.plans, { id: 'p' + Date.now(), name: ep.name, guests: ep.guests, date: ep.date, recipeIds: [] }];
+      } else {
+        plans = s.plans.map(p => p.id === ep.id ? { ...p, name: ep.name, guests: ep.guests, date: ep.date } : p);
+      }
+      return { plans };
+    });
+    this.goBack();
+  }
+  deleteCurrentPlan() {
+    this.setState(s => ({ plans: s.plans.filter(p => p.id !== s.planId) }));
+    this.goBack();
+  }
+  updatePlanField(key, value) { this.setState(s => ({ editingPlan: { ...s.editingPlan, [key]: value } })); }
+
+  togglePlanRecipe(recipeId) {
+    this.setState(s => ({
+      plans: s.plans.map(p => {
+        if (p.id !== s.planId) return p;
+        const has = p.recipeIds.includes(recipeId);
+        return { ...p, recipeIds: has ? p.recipeIds.filter(id => id !== recipeId) : [...p.recipeIds, recipeId] };
+      }),
+    }));
+  }
+  removeRecipeFromPlan(recipeId) {
+    this.setState(s => ({
+      plans: s.plans.map(p => p.id === s.planId ? { ...p, recipeIds: p.recipeIds.filter(id => id !== recipeId) } : p),
+    }));
+  }
+
+  decorateRecipe(r) {
+    const cat = CATEGORIES.find(c => c.id === r.categoryId);
+    const h = cat ? cat.hue : 25;
+    return {
+      ...r,
+      isFav: !!this.state.favorites[r.id],
+      isFavOff: !this.state.favorites[r.id],
+      toggleFav: (e) => { e.stopPropagation(); this.toggleFavorite(r.id); },
+      open: () => this.openRecipe(r.id),
+      grad: hueGrad(h),
+      solid: hueSolid(h),
+      tint: hueTint(h),
+      categoryName: cat ? cat.name : '',
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const recipes = s.recipes;
+    const pal = (this.props && this.props.accentPalette) || ['#C1583D', '#DA8A4E'];
+    const accentA = pal[0], accentB = pal[1] || pal[0];
+    const accentGrad = 'linear-gradient(135deg, ' + accentA + ', ' + accentB + ')';
+    const accentSolid = accentA;
+    const accentTint = 'color-mix(in oklch, ' + accentA + ' 10%, white)';
+    const accentTintBorder = 'color-mix(in oklch, ' + accentA + ' 55%, white)';
+
+    const categoriesView = CATEGORIES.map(c => ({
+      ...c,
+      count: recipes.filter(r => r.categoryId === c.id).length,
+      grad: hueGrad(c.hue),
+      solid: hueSolid(c.hue),
+      tint: hueTint(c.hue),
+      tintText: hueTintText(c.hue),
+      hasImage: !!c.image,
+      tileBg: c.image ? ('linear-gradient(0deg, rgba(0,0,0,0.55), rgba(0,0,0,0.05)), url(' + c.image + ') center/cover') : hueGrad(c.hue),
+      open: () => this.openCategory(c.id),
+    }));
+
+    const currentCategory = CATEGORIES.find(c => c.id === s.categoryId) || { name: '' };
+    const categoryRecipesView = recipes.filter(r => r.categoryId === s.categoryId).map(r => this.decorateRecipe(r));
+
+    const currentRecipeRaw = recipes.find(r => r.id === s.recipeId);
+    let currentRecipe = null;
+    if (currentRecipeRaw) {
+      const cat = CATEGORIES.find(c => c.id === currentRecipeRaw.categoryId);
+      const h = cat ? cat.hue : 25;
+      currentRecipe = {
+        ...currentRecipeRaw,
+        isFav: !!s.favorites[currentRecipeRaw.id],
+        isFavOff: !s.favorites[currentRecipeRaw.id],
+        toggleFav: () => this.toggleFavorite(currentRecipeRaw.id),
+        edit: () => this.startEditRecipe(currentRecipeRaw),
+        categoryName: cat ? cat.name : '',
+        grad: hueGrad(h),
+        solid: hueSolid(h),
+        tint: hueTint(h),
+        ingredientsView: currentRecipeRaw.ingredients.map((text, i) => ({ text, checked: !!s.checkedIngredients[i], uncheckedFlag: !s.checkedIngredients[i], toggle: () => this.toggleIngredientCheck(i) })),
+        stepsView: currentRecipeRaw.steps.map((text, i) => ({ n: i + 1, text })),
+      };
+    }
+
+    let cookStep = null, cookTotal = 0, isFirstCookStep = false, isLastCookStep = false;
+    if (currentRecipe) {
+      cookTotal = currentRecipe.stepsView.length;
+      const idx = Math.min(s.cookStepIndex, cookTotal - 1);
+      cookStep = currentRecipe.stepsView[idx];
+      isFirstCookStep = idx === 0;
+      isLastCookStep = idx === cookTotal - 1;
+    }
+
+    const favoritesView = recipes.filter(r => s.favorites[r.id]).map(r => this.decorateRecipe(r));
+    const q = s.query.trim();
+    const searchResultsView = (q ? recipes.filter(r => r.name.indexOf(q) !== -1) : recipes).map(r => this.decorateRecipe(r));
+
+    const editing = s.editingRecipe;
+    let editIngredientsView = [], editStepsView = [], categoryChipsView = [];
+    if (editing) {
+      editIngredientsView = editing.ingredients.map((val, i) => ({ val, onChange: (e) => this.updateIngredient(i, e.target.value), remove: () => this.removeIngredient(i) }));
+      editStepsView = editing.steps.map((val, i) => ({ val, n: i + 1, onChange: (e) => this.updateStep(i, e.target.value), remove: () => this.removeStep(i) }));
+      categoryChipsView = CATEGORIES.map(c => ({ ...c, selected: editing.categoryId === c.id, unselectedFlag: editing.categoryId !== c.id, select: () => this.updateField('categoryId', c.id) }));
+    }
+
+    const plansView = s.plans.map(p => ({
+      ...p,
+      hasDate: !!p.date,
+      recipeCount: p.recipeIds.length,
+      open: () => this.openPlan(p.id),
+    }));
+
+    const currentPlanRaw = s.plans.find(p => p.id === s.planId);
+    let currentPlan = null;
+    if (currentPlanRaw) {
+      const planRecipes = currentPlanRaw.recipeIds.map(rid => recipes.find(r => r.id === rid)).filter(Boolean).map(r => {
+        const dec = this.decorateRecipe(r);
+        return { ...dec, remove: () => this.removeRecipeFromPlan(r.id) };
+      });
+      currentPlan = {
+        ...currentPlanRaw,
+        hasDate: !!currentPlanRaw.date,
+        recipeCount: planRecipes.length,
+        hasRecipes: planRecipes.length > 0,
+        noRecipes: planRecipes.length === 0,
+        recipesView: planRecipes,
+      };
+    }
+
+    const planPickerRecipesView = currentPlanRaw ? recipes.map(r => {
+      const dec = this.decorateRecipe(r);
+      const included = currentPlanRaw.recipeIds.includes(r.id);
+      return { ...dec, included, notIncluded: !included, toggle: () => this.togglePlanRecipe(r.id) };
+    }) : [];
+
+    const editingPlan = s.editingPlan;
+
+    return {
+      isHome: s.screen === 'home',
+      isCategory: s.screen === 'category',
+      isRecipe: s.screen === 'recipe',
+      isEdit: s.screen === 'edit',
+      isSearch: s.screen === 'search',
+      isFavorites: s.screen === 'favorites',
+      isPlans: s.screen === 'plans',
+      isPlanDetail: s.screen === 'planDetail',
+      isPlanEdit: s.screen === 'planEdit',
+      isPlanPicker: s.screen === 'planPicker',
+      isCookMode: s.screen === 'cookMode',
+      cookStep, cookProgressText: 'שלב ' + (s.cookStepIndex + 1) + ' מתוך ' + cookTotal,
+      cookProgressPct: cookTotal ? Math.round(((s.cookStepIndex + 1) / cookTotal) * 100) : 0,
+      isEvenCookStep: (s.cookStepIndex % 2) === 0,
+      isOddCookStep: (s.cookStepIndex % 2) === 1,
+      isFirstCookStep, isLastCookStep,
+      isFirstCookStepOff: !isFirstCookStep, isLastCookStepOff: !isLastCookStep,
+      startCookMode: () => this.startCookMode(),
+      nextCookStep: () => this.nextCookStep(),
+      prevCookStep: () => this.prevCookStep(),
+      exitCookMode: () => this.goBack(),
+      isNewRecipe: s.isNewRecipe,
+      isEditExisting: !s.isNewRecipe,
+      isNewPlan: s.isNewPlan,
+      isEditPlanExisting: !s.isNewPlan,
+      showTabs: s.screen === 'home' || s.screen === 'search' || s.screen === 'favorites' || s.screen === 'plans',
+      homeColor: s.screen === 'home' ? accentSolid : 'oklch(0.6 0.01 50)',
+      searchColor: s.screen === 'search' ? accentSolid : 'oklch(0.6 0.01 50)',
+      favColor: s.screen === 'favorites' ? accentSolid : 'oklch(0.6 0.01 50)',
+      plansColor: (s.screen === 'plans') ? accentSolid : 'oklch(0.6 0.01 50)',
+      favIconFill: s.screen === 'favorites' ? accentSolid : 'none',
+      accentGrad, accentSolid, accentTint, accentTintBorder,
+
+      categoriesView, currentCategory, categoryRecipesView,
+      currentRecipe,
+      favoritesView, hasFavorites: favoritesView.length > 0, noFavorites: favoritesView.length === 0,
+      query: s.query, searchResultsView, noSearchResults: searchResultsView.length === 0,
+      editing, editIngredientsView, editStepsView, categoryChipsView,
+
+      plansView, hasPlans: plansView.length > 0, noPlans: plansView.length === 0,
+      currentPlan, editingPlan, planPickerRecipesView,
+
+      goHome: () => this.goHome(),
+      goSearch: () => this.goSearch(),
+      goFavorites: () => this.goFavorites(),
+      goPlans: () => this.goPlans(),
+      goBack: () => this.goBack(),
+      startAddRecipe: () => this.startAddRecipe(),
+      setQuery: (e) => this.setQuery(e.target.value),
+      updateName: (e) => this.updateField('name', e.target.value),
+      updateServings: (e) => this.updateField('servings', e.target.value),
+      updatePrep: (e) => this.updateField('prepTime', e.target.value),
+      updateCook: (e) => this.updateField('cookTime', e.target.value),
+      updateNotes: (e) => this.updateField('notes', e.target.value),
+      addIngredient: () => this.addIngredient(),
+      addStep: () => this.addStep(),
+      saveRecipe: () => this.saveRecipe(),
+      cancelEdit: () => this.cancelEdit(),
+
+      startAddPlan: () => this.startAddPlan(),
+      editCurrentPlan: () => this.editCurrentPlan(),
+      deleteCurrentPlan: () => this.deleteCurrentPlan(),
+      cancelPlanEdit: () => this.cancelPlanEdit(),
+      savePlan: () => this.savePlan(),
+      openPlanPicker: () => this.openPlanPicker(),
+      updatePlanName: (e) => this.updatePlanField('name', e.target.value),
+      updatePlanGuests: (e) => this.updatePlanField('guests', e.target.value),
+      updatePlanDate: (e) => this.updatePlanField('date', e.target.value),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
