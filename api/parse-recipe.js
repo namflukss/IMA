@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-const CATEGORY_IDS = ['soups', 'mains', 'pastries', 'cakes', 'salads', 'chicken', 'meat', 'veg', 'kids'];
+const CATEGORY_IDS = ['soups', 'mains', 'pastries', 'desserts', 'salads', 'chicken', 'meat', 'veg', 'kids'];
 
 const RECIPE_SCHEMA = {
   type: 'object',
@@ -21,7 +21,7 @@ const RECIPE_SCHEMA = {
 const SYSTEM_PROMPT = `את עוזרת שמחלצת מתכוני בישול ומסדרת אותם לפורמט מובנה עבור אפליקציית מתכונים בעברית.
 קיבלת תמונה של מתכון (כתוב יד או מודפס) או טקסט חופשי של מתכון. חלצי ממנו:
 - שם המתכון
-- הקטגוריה המתאימה ביותר מתוך: מרקים(soups), עיקריות(mains), פשטידות(pastries), עוגות(cakes), סלטים(salads), עוף(chicken), בשר(meat), צמחוני(veg), ילדים(kids)
+- הקטגוריה המתאימה ביותר מתוך: מרקים(soups), עיקריות(mains), פשטידות(pastries), קינוחים(desserts), סלטים(salads), עוף(chicken), בשר(meat), צמחוני(veg), ילדים(kids)
 - כמות מנות (מספר; אם לא מצוין, נחשי לפי הכמויות - בדרך כלל 4)
 - זמן הכנה וזמן בישול בדקות (אם לא מצוינים, העריכי הערכה סבירה לפי סוג המתכון)
 - רשימת רכיבים, כל רכיב כשורה נפרדת עם כמות

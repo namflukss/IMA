@@ -122,12 +122,16 @@ export default function EditRecipeScreen({ app }) {
 
         <div>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'oklch(0.5 0.012 50)', marginBottom: 8 }}>קטגוריה</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {app.categoryChipsView.map((c) => (
-              <div key={c.id} onClick={c.select} style={c.selected
-                ? { padding: '8px 14px', borderRadius: 100, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', background: c.solid, color: 'white' }
-                : { padding: '8px 14px', borderRadius: 100, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', background: 'white', border: '1px solid oklch(0.88 0.008 60)', color: 'oklch(0.4 0.015 50)' }}>
-                {c.name}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {app.categoryPickerLevels.map((level, li) => (
+              <div key={li} style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {level.map((c) => (
+                  <div key={c.id} onClick={c.select} style={c.selected
+                    ? { padding: '8px 14px', borderRadius: 100, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', background: c.solid, color: 'white' }
+                    : { padding: '8px 14px', borderRadius: 100, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', background: 'white', border: '1px solid oklch(0.88 0.008 60)', color: 'oklch(0.4 0.015 50)' }}>
+                    {c.name}
+                  </div>
+                ))}
               </div>
             ))}
           </div>

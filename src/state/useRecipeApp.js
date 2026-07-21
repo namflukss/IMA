@@ -2,8 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CATEGORIES } from '../data/categories';
 import { INITIAL_RECIPES } from '../data/recipes';
 import { hueGrad, hueSolid, hueTint, hueTintText, ACCENT_GRAD, ACCENT_SOLID, ACCENT_TINT, ACCENT_TINT_BORDER } from '../lib/colors';
+import { findNode, findCategoryInfo, findPathToLeaf, firstLeafId, countRecipesUnder } from '../lib/categoryTree';
 
 const STORAGE_KEY = 'moms-recipes-app-v1';
+const DEFAULT_LEAF_ID = firstLeafId(CATEGORIES[0]);
 
 function loadStored() {
   try {
@@ -15,12 +17,26 @@ function loadStored() {
   }
 }
 
-const NAV_FIELDS = ['screen', 'categoryId', 'recipeId', 'planId'];
+const NAV_FIELDS = ['screen', 'categoryPath', 'recipeId', 'planId'];
 
 function snapshot(nav) {
   const s = {};
   for (const k of NAV_FIELDS) s[k] = nav[k];
   return s;
+}
+
+function tileView(node, recipes, openFn) {
+  return {
+    id: node.id,
+    name: node.name,
+    count: countRecipesUnder(node, recipes),
+    grad: hueGrad(node.hue),
+    solid: hueSolid(node.hue),
+    tint: hueTint(node.hue),
+    tintText: hueTintText(node.hue),
+    tileBg: node.image ? `linear-gradient(0deg, rgba(0,0,0,0.55), rgba(0,0,0,0.05)), url(${node.image}) center/cover` : hueGrad(node.hue),
+    open: () => openFn(node),
+  };
 }
 
 export function useRecipeApp() {
@@ -30,7 +46,7 @@ export function useRecipeApp() {
   const [favorites, setFavorites] = useState(stored?.favorites ?? {});
   const [plans, setPlans] = useState(stored?.plans ?? []);
 
-  const [nav, setNav] = useState({ screen: 'home', categoryId: null, recipeId: null, planId: null });
+  const [nav, setNav] = useState({ screen: 'home', categoryPath: [], recipeId: null, planId: null });
   const stackRef = useRef([]);
 
   const [query, setQuery] = useState('');
@@ -62,7 +78,7 @@ export function useRecipeApp() {
     setEditingRecipe(null);
     setEditingPlan(null);
     if (!prev) {
-      setNav({ screen: 'home', categoryId: null, recipeId: null, planId: null });
+      setNav({ screen: 'home', categoryPath: [], recipeId: null, planId: null });
     } else {
       setNav(prev);
     }
@@ -78,7 +94,7 @@ export function useRecipeApp() {
     stackRef.current = [];
     setEditingRecipe(null);
     setEditingPlan(null);
-    setNav({ screen, categoryId: null, recipeId: null, planId: null });
+    setNav({ screen, categoryPath: [], recipeId: null, planId: null });
     history.pushState({ depth: 0 }, '');
   }, []);
 
@@ -91,7 +107,7 @@ export function useRecipeApp() {
   const goFavorites = useCallback(() => switchTab('favorites'), [switchTab]);
   const goPlans = useCallback(() => switchTab('plans'), [switchTab]);
 
-  const openCategory = useCallback((id) => push({ screen: 'category', categoryId: id, recipeId: null }), [push]);
+  const openCategoryPath = useCallback((path) => push({ screen: 'category', categoryPath: path, recipeId: null }), [push]);
   const openRecipe = useCallback((id) => {
     setCheckedIngredients({});
     push({ screen: 'recipe', recipeId: id });
@@ -105,10 +121,12 @@ export function useRecipeApp() {
   }, []);
 
   const startAddRecipe = useCallback(() => {
-    setEditingRecipe({ id: null, name: '', categoryId: nav.categoryId || CATEGORIES[0].id, servings: 4, prepTime: 15, cookTime: 30, ingredients: [''], steps: [''], notes: '' });
+    const currentNode = findNode(nav.categoryPath);
+    const defaultCategoryId = currentNode && !currentNode.children ? currentNode.id : DEFAULT_LEAF_ID;
+    setEditingRecipe({ id: null, name: '', categoryId: defaultCategoryId, servings: 4, prepTime: 15, cookTime: 30, ingredients: [''], steps: [''], notes: '' });
     setIsNewRecipe(true);
     push({ screen: 'edit' });
-  }, [push, nav.categoryId]);
+  }, [push, nav.categoryPath]);
 
   const startEditRecipe = useCallback((recipe) => {
     setEditingRecipe(JSON.parse(JSON.stringify(recipe)));
@@ -119,17 +137,20 @@ export function useRecipeApp() {
   const cancelEdit = goBack;
 
   const applyParsedRecipe = useCallback((parsed) => {
-    setEditingRecipe((r) => ({
-      ...r,
-      name: parsed.name || r.name,
-      categoryId: CATEGORIES.some((c) => c.id === parsed.categoryId) ? parsed.categoryId : r.categoryId,
-      servings: parsed.servings || r.servings,
-      prepTime: parsed.prepTime ?? r.prepTime,
-      cookTime: parsed.cookTime ?? r.cookTime,
-      ingredients: parsed.ingredients?.length ? parsed.ingredients : r.ingredients,
-      steps: parsed.steps?.length ? parsed.steps : r.steps,
-      notes: parsed.notes || r.notes,
-    }));
+    setEditingRecipe((r) => {
+      const topMatch = CATEGORIES.find((c) => c.id === parsed.categoryId);
+      return {
+        ...r,
+        name: parsed.name || r.name,
+        categoryId: topMatch ? firstLeafId(topMatch) : r.categoryId,
+        servings: parsed.servings || r.servings,
+        prepTime: parsed.prepTime ?? r.prepTime,
+        cookTime: parsed.cookTime ?? r.cookTime,
+        ingredients: parsed.ingredients?.length ? parsed.ingredients : r.ingredients,
+        steps: parsed.steps?.length ? parsed.steps : r.steps,
+        notes: parsed.notes || r.notes,
+      };
+    });
   }, []);
 
   const saveRecipe = useCallback(() => {
@@ -148,6 +169,8 @@ export function useRecipeApp() {
   const updateStep = useCallback((i, v) => setEditingRecipe((r) => { const arr = [...r.steps]; arr[i] = v; return { ...r, steps: arr }; }), []);
   const addStep = useCallback(() => setEditingRecipe((r) => ({ ...r, steps: [...r.steps, ''] })), []);
   const removeStep = useCallback((i) => setEditingRecipe((r) => { const arr = r.steps.filter((_, idx) => idx !== i); return { ...r, steps: arr.length ? arr : [''] }; }), []);
+
+  const selectCategory = useCallback((node) => updateField('categoryId', firstLeafId(node)), [updateField]);
 
   const startCookMode = useCallback(() => { setCookStepIndex(0); push({ screen: 'cookMode' }); }, [push]);
   const currentRecipeStepsLength = useMemo(() => recipes.find((r) => r.id === nav.recipeId)?.steps.length ?? 0, [recipes, nav.recipeId]);
@@ -202,7 +225,7 @@ export function useRecipeApp() {
   }, [nav.planId]);
 
   const decorateRecipe = useCallback((r) => {
-    const cat = CATEGORIES.find((c) => c.id === r.categoryId);
+    const cat = findCategoryInfo(r.categoryId);
     const h = cat ? cat.hue : 25;
     return {
       ...r,
@@ -219,24 +242,30 @@ export function useRecipeApp() {
 
   // ---- derived view, analogous to the prototype's renderVals() ----
 
-  const categoriesView = useMemo(() => CATEGORIES.map((c) => ({
-    ...c,
-    count: recipes.filter((r) => r.categoryId === c.id).length,
-    grad: hueGrad(c.hue),
-    solid: hueSolid(c.hue),
-    tint: hueTint(c.hue),
-    tintText: hueTintText(c.hue),
-    tileBg: c.image ? `linear-gradient(0deg, rgba(0,0,0,0.55), rgba(0,0,0,0.05)), url(${c.image}) center/cover` : hueGrad(c.hue),
-    open: () => openCategory(c.id),
-  })), [recipes, openCategory]);
+  const categoriesView = useMemo(
+    () => CATEGORIES.map((c) => tileView(c, recipes, (node) => openCategoryPath([node.id]))),
+    [recipes, openCategoryPath],
+  );
 
-  const currentCategory = useMemo(() => CATEGORIES.find((c) => c.id === nav.categoryId) || { name: '' }, [nav.categoryId]);
-  const categoryRecipesView = useMemo(() => recipes.filter((r) => r.categoryId === nav.categoryId).map(decorateRecipe), [recipes, nav.categoryId, decorateRecipe]);
+  const categoryNode = useMemo(() => findNode(nav.categoryPath), [nav.categoryPath]);
+  const categoryHasChildren = !!(categoryNode && categoryNode.children && categoryNode.children.length);
+  const currentCategoryName = categoryNode ? categoryNode.name : '';
+
+  const categoryChildrenView = useMemo(() => {
+    if (!categoryHasChildren) return [];
+    return categoryNode.children.map((child) => tileView(child, recipes, (node) => openCategoryPath([...nav.categoryPath, node.id])));
+  }, [categoryHasChildren, categoryNode, recipes, openCategoryPath, nav.categoryPath]);
+
+  const categoryRecipesView = useMemo(() => {
+    if (!categoryNode || categoryHasChildren) return [];
+    return recipes.filter((r) => r.categoryId === categoryNode.id).map(decorateRecipe);
+  }, [categoryNode, categoryHasChildren, recipes, decorateRecipe]);
+  const noCategoryRecipes = !categoryHasChildren && categoryRecipesView.length === 0;
 
   const currentRecipe = useMemo(() => {
     const raw = recipes.find((r) => r.id === nav.recipeId);
     if (!raw) return null;
-    const cat = CATEGORIES.find((c) => c.id === raw.categoryId);
+    const cat = findCategoryInfo(raw.categoryId);
     const h = cat ? cat.hue : 25;
     return {
       ...raw,
@@ -271,7 +300,30 @@ export function useRecipeApp() {
 
   const editIngredientsView = useMemo(() => editingRecipe ? editingRecipe.ingredients.map((val, i) => ({ val, onChange: (e) => updateIngredient(i, e.target.value), remove: () => removeIngredient(i) })) : [], [editingRecipe, updateIngredient, removeIngredient]);
   const editStepsView = useMemo(() => editingRecipe ? editingRecipe.steps.map((val, i) => ({ val, n: i + 1, onChange: (e) => updateStep(i, e.target.value), remove: () => removeStep(i) })) : [], [editingRecipe, updateStep, removeStep]);
-  const categoryChipsView = useMemo(() => editingRecipe ? CATEGORIES.map((c) => ({ ...c, selected: editingRecipe.categoryId === c.id, unselectedFlag: editingRecipe.categoryId !== c.id, select: () => updateField('categoryId', c.id) })) : [], [editingRecipe, updateField]);
+
+  // Cascading category picker for the edit form: one chip row per tree
+  // depth, each level showing the children of whichever chip is selected
+  // in the level above.
+  const categoryPickerLevels = useMemo(() => {
+    if (!editingRecipe) return [];
+    const path = findPathToLeaf(editingRecipe.categoryId) || findPathToLeaf(DEFAULT_LEAF_ID);
+    const levels = [];
+    let nodes = CATEGORIES;
+    for (let i = 0; i < path.length; i++) {
+      const selectedNode = path[i];
+      levels.push(nodes.map((n) => ({
+        id: n.id,
+        name: n.name,
+        selected: n.id === selectedNode.id,
+        unselectedFlag: n.id !== selectedNode.id,
+        solid: hueSolid(n.hue),
+        select: () => selectCategory(n),
+      })));
+      if (!selectedNode.children) break;
+      nodes = selectedNode.children;
+    }
+    return levels;
+  }, [editingRecipe, selectCategory]);
 
   const plansView = useMemo(() => plans.map((p) => ({ ...p, hasDate: !!p.date, recipeCount: p.recipeIds.length, open: () => openPlan(p.id) })), [plans, openPlan]);
 
@@ -315,7 +367,8 @@ export function useRecipeApp() {
     favIconFill: screen === 'favorites' ? ACCENT_SOLID : 'none',
     accentGrad: ACCENT_GRAD, accentSolid: ACCENT_SOLID, accentTint: ACCENT_TINT, accentTintBorder: ACCENT_TINT_BORDER,
 
-    categoriesView, currentCategory, categoryRecipesView,
+    categoriesView,
+    currentCategoryName, categoryHasChildren, categoryChildrenView, categoryRecipesView, noCategoryRecipes,
     currentRecipe,
     cookStep, cookTotal,
     cookProgressText: `שלב ${cookStepIndex + 1} מתוך ${cookTotal}`,
@@ -328,7 +381,7 @@ export function useRecipeApp() {
     favoritesView, hasFavorites: favoritesView.length > 0, noFavorites: favoritesView.length === 0,
     query, searchResultsView, noSearchResults: searchResultsView.length === 0,
 
-    editing: editingRecipe, editIngredientsView, editStepsView, categoryChipsView,
+    editing: editingRecipe, editIngredientsView, editStepsView, categoryPickerLevels,
     isNewRecipe, isEditExisting: !isNewRecipe,
 
     plansView, hasPlans: plansView.length > 0, noPlans: plansView.length === 0,
